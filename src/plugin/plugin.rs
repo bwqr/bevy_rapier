@@ -6,6 +6,10 @@ use bevy::ecs::{event::Events, query::WorldQuery};
 use bevy::prelude::*;
 use std::marker::PhantomData;
 
+#[derive(Resource)]
+/// A struct that logs the time passed while stepping the simulation
+pub struct PhysicsTime(pub u32);
+
 /// No specific user-data is associated to the hooks.
 pub type NoUserData = ();
 
@@ -194,6 +198,8 @@ impl<PhysicsHooksData: 'static + WorldQuery + Send + Sync> Plugin
         if app.world.get_resource::<RapierConfiguration>().is_none() {
             app.insert_resource(RapierConfiguration::default());
         }
+
+        app.insert_resource(PhysicsTime(0));
 
         app.insert_resource(SimulationToRenderTime::default())
             .insert_resource(RapierContext {

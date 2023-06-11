@@ -57,12 +57,15 @@ pub struct RapierContext {
     pub(crate) event_handler: Option<Box<dyn EventHandler>>,
     // For transform change detection.
     #[cfg_attr(feature = "serde-serialize", serde(skip))]
-    pub(crate) last_body_transform_set: HashMap<RigidBodyHandle, GlobalTransform>,
+    /// Changed to public to be used in our plugin.
+    pub last_body_transform_set: HashMap<RigidBodyHandle, GlobalTransform>,
     // NOTE: these maps are needed to handle despawning.
     #[cfg_attr(feature = "serde-serialize", serde(skip))]
-    pub(crate) entity2body: HashMap<Entity, RigidBodyHandle>,
+    /// Changed to public to be used in our plugin.
+    pub entity2body: HashMap<Entity, RigidBodyHandle>,
     #[cfg_attr(feature = "serde-serialize", serde(skip))]
-    pub(crate) entity2collider: HashMap<Entity, ColliderHandle>,
+    /// Changed to public to be used in our plugin.
+    pub entity2collider: HashMap<Entity, ColliderHandle>,
     #[cfg_attr(feature = "serde-serialize", serde(skip))]
     pub(crate) entity2impulse_joint: HashMap<Entity, ImpulseJointHandle>,
     #[cfg_attr(feature = "serde-serialize", serde(skip))]
@@ -196,7 +199,7 @@ impl RapierContext {
         timestep_mode: TimestepMode,
         events: Option<(EventWriter<CollisionEvent>, EventWriter<ContactForceEvent>)>,
         hooks: &dyn PhysicsHooks,
-        time: &Time,
+        delta_seconds: f32,
         sim_to_render_time: &mut SimulationToRenderTime,
         mut interpolation_query: Option<
             Query<(&RapierRigidBodyHandle, &mut TransformInterpolation)>,
@@ -220,7 +223,7 @@ impl RapierContext {
                 time_scale,
                 substeps,
             } => {
-                sim_to_render_time.diff += time.delta_seconds();
+                sim_to_render_time.diff += delta_seconds;
 
                 while sim_to_render_time.diff > 0.0 {
                     // NOTE: in this comparison we do the same computations we
@@ -270,7 +273,7 @@ impl RapierContext {
             } => {
                 let mut substep_integration_parameters = self.integration_parameters;
                 substep_integration_parameters.dt =
-                    (time.delta_seconds() * time_scale).min(max_dt) / (substeps as Real);
+                    (delta_seconds * time_scale).min(max_dt) / (substeps as Real);
 
                 for _ in 0..substeps {
                     self.pipeline.step(

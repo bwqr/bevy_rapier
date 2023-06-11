@@ -636,7 +636,10 @@ pub fn step_simulation<PhysicsHooksData: 'static + WorldQuery + Send + Sync>(
     contact_force_events: EventWriter<ContactForceEvent>,
     hooks_data: Query<PhysicsHooksData>,
     interpolation_query: Query<(&RapierRigidBodyHandle, &mut TransformInterpolation)>,
+    mut physics_time: ResMut<super::plugin::PhysicsTime>,
 ) {
+    let instant = std::time::Instant::now();
+
     let context = &mut *context;
 
     if config.physics_pipeline_active {
@@ -650,7 +653,7 @@ pub fn step_simulation<PhysicsHooksData: 'static + WorldQuery + Send + Sync>(
             config.timestep_mode,
             Some((collision_events, contact_force_events)),
             &hooks_instance,
-            &time,
+            time.delta_seconds(),
             &mut sim_to_render_time,
             Some(interpolation_query),
         );
@@ -662,6 +665,8 @@ pub fn step_simulation<PhysicsHooksData: 'static + WorldQuery + Send + Sync>(
     if config.query_pipeline_active {
         context.update_query_pipeline();
     }
+
+    physics_time.0 = instant.elapsed().as_micros().try_into().unwrap();
 }
 
 /// NOTE: This currently does nothing in 2D.

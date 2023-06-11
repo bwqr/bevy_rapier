@@ -41,7 +41,7 @@ pub(crate) fn transform_to_iso(transform: &Transform, physics_scale: Real) -> Is
 ///
 /// The translation is divided by the `physics_scale`.
 #[cfg(feature = "dim3")]
-pub(crate) fn transform_to_iso(transform: &Transform, physics_scale: Real) -> Isometry<Real> {
+pub fn transform_to_iso(transform: &Transform, physics_scale: Real) -> Isometry<Real> {
     Isometry::from_parts(
         (transform.translation / physics_scale).into(),
         transform.rotation.into(),
